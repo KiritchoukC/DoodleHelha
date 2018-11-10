@@ -1,0 +1,153 @@
+/**
+ * This injects Tailwind's base styles, which is a combination of
+ * Normalize.css and some additional base styles.
+ *
+ * You can see the styles here:
+ * https://github.com/tailwindcss/tailwindcss/blob/master/css/preflight.css
+ *
+ * If using `postcss-import`, use this import instead:
+ *
+ * @import "tailwindcss/preflight";
+ */
+@tailwind preflight;
+
+/**
+ * This injects any component classes registered by plugins.
+ *
+ * If using `postcss-import`, use this import instead:
+ *
+ * @import "tailwindcss/components";
+ */
+@tailwind components;
+
+/**
+ * Here you would add any of your custom component classes; stuff that you'd
+ * want loaded *before* the utilities so that the utilities could still
+ * override them.
+ *
+ * Example:
+ *
+ * .btn { ... }
+ * .form-input { ... }
+ *
+ * Or if using a preprocessor or `postcss-import`:
+ *
+ * @import "components/buttons";
+ * @import "components/forms";
+ */
+
+/**
+ * This injects all of Tailwind's utility classes, generated based on your
+ * config file.
+ *
+ * If using `postcss-import`, use this import instead:
+ *
+ * @import "tailwindcss/utilities";
+ */
+@tailwind utilities;
+
+/**
+ * Here you would add any custom utilities you need that don't come out of the
+ * box with Tailwind.
+ *
+ * Example :
+ *
+ * .bg-pattern-graph-paper { ... }
+ * .skew-45 { ... }
+ *
+ * Or if using a preprocessor or `postcss-import`:
+ *
+ * @import "utilities/background-patterns";
+ * @import "utilities/skew-transforms";
+ */
+
+/**
+* #CLASSES
+*/
+
+.center {
+  @apply flex;
+  @apply justify-center;
+  @apply items-center;
+  @apply h-screen;
+  @apply w-screen;
+}
+
+.no-outline,
+.no-outline:focus,
+.no-outline:active {
+  @apply outline-none;
+}
+
+.bg-grad-red {
+  background: linear-gradient(
+    120deg,
+    config('colors.red-light'),
+    config('colors.red')
+  );
+}
+
+.w-1\/7 {
+  width: calc(100% / 7);
+}
+
+.vue-dialog .dialog-content {
+  padding: 0;
+}
+
+.text-shadow {
+  text-shadow: 0px 0px 10px config('colors.grey-darkest');
+}
+
+.vue-dialog .dialog-c-title {
+  @apply bg-grad-red;
+  @apply text-2xl;
+  @apply text-grey-lightest;
+  @apply p-6;
+}
+
+.vue-dialog .dialog-c-close {
+  line-height: 0.9;
+}
+
+.vue-dialog-buttons {
+  @apply border-0;
+}
+
+.vue-dialog-button:first-child {
+  @apply bg-grey-lighter;
+  @apply text-grey-darker;
+}
+
+.vue-dialog-button:first-child:hover {
+  @apply bg-grey-light;
+  @apply text-grey-darkest;
+}
+
+.vue-dialog-button:last-child {
+  @apply bg-red-lightest;
+  @apply text-red;
+}
+
+.vue-dialog-button:last-child:hover {
+  @apply bg-red-lighter;
+  @apply text-red-dark;
+}
+
+.vue-dialog-button {
+  @apply border-0;
+  @apply font-semibold;
+  @apply text-lg;
+}
+
+.vue-dialog-button,
+.vue-dialog-button:focus,
+.vue-dialog-button:active {
+  outline: none !important;
+}
+
+.vue-dialog .dialog-c-text {
+  @apply p-8;
+  @apply text-xl;
+  @apply text-center;
+}
