@@ -76,7 +76,6 @@ export default {
       listContainerHeight: 0,
       formGroupStyles: {
         opacity: 0,
-        // transform: `translateY(-${this.groupFormHeight}px)`,
         transform: 'translateY(-229px)',
         marginBottom: '-219px',
         transition: 'transform ease-in-out 0.3s, opacity ease-in-out 0.3s'
