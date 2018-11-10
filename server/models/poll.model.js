@@ -5,10 +5,10 @@ let PollSchema = new Schema({
   creationDate: { type: Date, required: true },
   creationUserId: {
     type: Schema.Types.ObjectId,
-    ref: 'member',
+    ref: 'Users',
     required: true
   },
-  groupId: { type: Schema.Types.ObjectId, ref: 'group', required: true },
+  groupId: { type: Schema.Types.ObjectId, ref: 'Group', required: true },
   name: { type: String, required: true, max: 100 },
   description: { type: String, required: true }
 })

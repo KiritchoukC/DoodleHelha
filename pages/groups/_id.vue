@@ -93,75 +93,43 @@
         :clear-on-select="false"
         :preserve-search="true"
         :loading="usersLoading"
-        :allow-empty="false"
         placeholder="Utilisateurs du groupe"
         label="email"
         track-by="_id"/>
     </modal>
     <v-dialog/>
-    <!-- <div class="poll">
-      <div class="poll__list">
-        <div class="poll__item" v-for="poll in group.polls">
-          <div class="poll__info">
-            <h4>{{poll.name}}</h4>
-            <p class="text-grey">{{poll.description}}</p>
-          </div>
-          <div class="poll__result">
-            <h1>3</h1>
-            <p>Réponses</p>
-          </div>
-        </div>
-      </div>
-    </div> -->
   </section>
 </template>
 
 <style scoped>
-.poll__list {
-  height: calc(100vh - 400px);
-  overflow: auto;
-}
-
-.poll__item {
-  margin: 0 15px;
-  width: 400px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.poll__result {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.poll__result h1 {
-  width: 64px;
-  height: 64px;
-  text-align: center;
-  border: var(--primary) solid 2px;
-  border-radius: 50%;
-  margin: 0;
-}
-
-.poll__result p {
-  color: hsl(0, 0%, 70%);
-}
 </style>
 
 <script>
 export default {
   name: 'Id',
   async asyncData({ params, error, app }) {
-    const { data } = await app.$axios.get('/groups/' + params.id).catch(e => {
-      console.log(e)
-      // error({ statusCode: 404, message: 'Group not found' })
-    })
+    try {
+      const result = await app.$axios.get('/groups/' + params.id).catch(e => {
+        let message
+        switch (e.response.status) {
+          case 403:
+            message = "Vous n'avez pas accès à ce groupe"
+            break
 
-    return {
-      group: data,
-      value: data.users
+          default:
+            message = e.message
+            break
+        }
+        error({ statusCode: e.response.status, message })
+      })
+      if (result) {
+        return {
+          group: result.data || {},
+          value: result.data.users || []
+        }
+      }
+    } catch (err) {
+      error({ statusCode: params.statusCode, message: err.message })
     }
   },
   data() {
@@ -182,7 +150,15 @@ export default {
     }
   },
   computed: {},
+  beforeDestroy() {
+    this.$socket.off('removed_from_group')
+  },
   mounted: function() {
+    this.$socket.on('removed_from_group', group => {
+      if (this.group._id === group._id) {
+        this.$router.push('/groups/list')
+      }
+    })
     this.$nextTick().then(() => {
       this.listContainerStyles = {
         height: this.$refs.listContainerEl.offsetHeight,
@@ -259,10 +235,6 @@ export default {
         ]
       })
     },
-    closeDialog() {
-      console.log('closing Dialog')
-      this.$modal.hide('dialog')
-    },
     goToDetails(pollId) {
       this.$router.push('/polls/' + pollId)
     },
@@ -271,12 +243,14 @@ export default {
       this.$axios
         .get('/users')
         .then(res => {
-          this.options = res.data.map(user => {
-            return {
-              email: user.email,
-              _id: user._id
-            }
-          })
+          this.options = res.data
+            .filter(user => user._id !== this.group.creationUserId)
+            .map(user => {
+              return {
+                email: user.email,
+                _id: user._id
+              }
+            })
           this.usersLoading = false
         })
         .catch(e => {
@@ -285,52 +259,50 @@ export default {
         })
     },
     saveUsers() {
-      if (this.group.users.length !== this.value.length) {
-        // Get the removed users
-        const removedUsers = this.group.users.filter(
-          user => this.value.findIndex(v => v._id === user._id) < 0
-        )
-        // Get the added users
-        const addedUsers = this.value.filter(
-          user => this.group.users.findIndex(v => v._id === user._id) < 0
-        )
-        // Show loading
-        this.usersLoading = true
-        // Update the goup's users
-        this.group.users = JSON.parse(JSON.stringify(this.value))
-        // Build the group object to update
-        const group = JSON.parse(JSON.stringify(this.group))
-        group.users = this.value.map(user => user._id)
-        // Put request to update group with the added AND/OR removed users
-        this.$axios
-          .put(`/groups/${this.group._id}`, group)
-          .then(res => {
-            // Hide loading
-            this.usersLoading = false
+      // Get the removed users
+      const removedUsers = this.group.users.filter(
+        user => this.value.findIndex(v => v._id === user._id) < 0
+      )
+      // Get the added users
+      const addedUsers = this.value.filter(
+        user => this.group.users.findIndex(v => v._id === user._id) < 0
+      )
+      // Show loading
+      this.usersLoading = true
+      // Update the goup's users
+      this.group.users = JSON.parse(JSON.stringify(this.value))
+      // Build the group object to update
+      const group = JSON.parse(JSON.stringify(this.group))
+      group.users = this.value.map(user => user._id)
+      // Put request to update group with the added AND/OR removed users
+      this.$axios
+        .put(`/groups/${this.group._id}`, group)
+        .then(res => {
+          // Hide loading
+          this.usersLoading = false
 
-            // Notify removed users
-            if (removedUsers.length) {
-              const removeData = {
-                group: this.group,
-                removedUsers: removedUsers.map(u => u._id)
-              }
-              this.$socket.emit('remove_users_from_group', removeData)
+          // Notify removed users
+          if (removedUsers.length) {
+            const removeData = {
+              group: this.group,
+              removedUsers: removedUsers.map(u => u._id)
             }
+            this.$socket.emit('remove_users_from_group', removeData)
+          }
 
-            // Notify added users
-            if (addedUsers.length) {
-              const addData = {
-                group: this.group,
-                addedUsers: addedUsers.map(u => u._id)
-              }
-              this.$socket.emit('add_users_from_group', addData)
+          // Notify added users
+          if (addedUsers.length) {
+            const addData = {
+              group: this.group,
+              addedUsers: addedUsers.map(u => u._id)
             }
-          })
-          .catch(err => {
-            console.error(err)
-            this.$toast.error(err.message)
-          })
-      }
+            this.$socket.emit('add_users_from_group', addData)
+          }
+        })
+        .catch(err => {
+          console.error(err)
+          this.$toast.error(err.message)
+        })
     }
   }
 }

@@ -1,4 +1,5 @@
 const Poll = require('../models/poll.model')
+const mongoose = require('mongoose')
 
 const entry_service = require('./entry.service')
 
@@ -80,6 +81,16 @@ exports.update = function (id, poll) {
 exports.delete = function (id) {
   return new Promise((resolve, reject) => {
     Poll.findByIdAndDelete(id, (err, result) => {
+      if (err) reject(err)
+      resolve(result)
+    })
+  })
+}
+
+/* DELETE poll by groupId */
+exports.delete_by_group_id = function (groupId) {
+  return new Promise((resolve, reject) => {
+    Poll.deleteMany({groupId: mongoose.Types.ObjectId(groupId)}, (err, result) => {
       if (err) reject(err)
       resolve(result)
     })

@@ -16,6 +16,18 @@ export default {
   components: {
     MyFooter,
     MyHeader
+  },
+  mounted: function() {
+    this.$socket.on('removed_from_group', group => {
+      this.$toast.info(`Tu as été retiré du groupe ${group.name}`)
+    })
+    this.$socket.on('added_to_group', group => {
+      this.$toast.info(`Tu as été ajouté au groupe ${group.name}`)
+    })
+  },
+  beforeDestroy() {
+    this.$socket.off('removed_from_group')
+    this.$socket.off('added_to_group')
   }
 }
 </script>

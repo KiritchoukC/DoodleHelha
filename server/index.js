@@ -96,7 +96,6 @@ var onConnect = socket => {
       connectedUsers.forEach(user => {
         if (data.removedUsers.includes(user.userId)) {
           io.to(`${user.socketId}`).emit('removed_from_group', data.group)
-          console.log(`removed_from_group sent to ${user.userId}`)
         }
       })
     }
@@ -106,7 +105,6 @@ var onConnect = socket => {
       connectedUsers.forEach(user => {
         if (data.addedUsers.includes(user.userId)) {
           io.to(`${user.socketId}`).emit('added_to_group', data.group)
-          console.log(`added_to_group sent to ${user.userId}`)
         }
       })
     }

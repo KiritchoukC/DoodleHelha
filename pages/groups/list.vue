@@ -86,15 +86,12 @@ export default {
   beforeMount() {},
   mounted: function() {
     this.$socket.on('removed_from_group', group => {
-      console.log('removed_from_group received')
       const groupIndex = this.groups.findIndex(g => g._id === group._id)
       this.groups.splice(groupIndex, 1)
-      this.$toast.info(`Tu as été retiré du groupe ${group.name}`)
     })
     this.$socket.on('added_to_group', group => {
-      console.log('added_to_group received')
-      this.groups.push(group)
-      this.$toast.info(`Tu as été ajouté au groupe ${group.name}`)
+      const groupIndex = this.groups.findIndex(g => g._id === group._id)
+      if (groupIndex === -1) this.groups.push(group)
     })
     this.$nextTick().then(() => {
       this.listContainerStyles = {

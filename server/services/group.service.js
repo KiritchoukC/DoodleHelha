@@ -6,9 +6,14 @@ const mongoose = require('mongoose')
 const poll_service = require('./poll.service')
 
 /* GET groups */
-exports.get = function (userId) {
+exports.get = function(userId) {
   return new Promise((resolve, reject) => {
-    Group.find({ users: mongoose.Types.ObjectId(userId) }).exec((err, res) => {
+    Group.find({
+      $or: [
+        { users: mongoose.Types.ObjectId(userId) },
+        { creationUserId: mongoose.Types.ObjectId(userId) }
+      ]
+    }).exec((err, res) => {
       if (err) reject(err)
       resolve(res)
     })
@@ -16,7 +21,7 @@ exports.get = function (userId) {
 }
 
 /* GET group by ID. */
-exports.get_by_id = function (id) {
+exports.get_by_id = function(id) {
   return new Promise((resolve, reject) => {
     Group.findById(id)
       .populate('users')
@@ -29,6 +34,8 @@ exports.get_by_id = function (id) {
               _id: group._id,
               name: group.name,
               description: group.description,
+              creationUserId: group.creationUserId,
+              creationDate: group.creationDate,
               __v: group.__v,
               polls: polls,
               users: group.users.map(user => {
@@ -46,13 +53,17 @@ exports.get_by_id = function (id) {
 }
 
 /* POST group */
-exports.create = function (group) {
+exports.create = function(group) {
   return new Promise((resolve, reject) => {
     let groupToAdd = new Group({
       name: group.name,
-      description: group.description
+      description: group.description,
+      creationUserId: group.creationUserId,
+      creationDate: group.creationDate
     })
-    groupToAdd.users.push(group.userIds)
+    if (group.userIds) {
+      groupToAdd.users.push(group.userIds)
+    }
     groupToAdd.save((err, result) => {
       if (err) reject(err)
       resolve(result)
@@ -61,7 +72,7 @@ exports.create = function (group) {
 }
 
 /* PUT group */
-exports.update = function (id, group) {
+exports.update = function(id, group) {
   group.users = group.users.map(userId => mongoose.Types.ObjectId(userId))
   return new Promise((resolve, reject) => {
     Group.updateOne(
@@ -76,10 +87,14 @@ exports.update = function (id, group) {
 }
 
 /* DELETE group */
-exports.delete = function (id) {
+exports.delete = function(id) {
   return new Promise((resolve, reject) => {
     Group.findByIdAndDelete(id, (err, result) => {
       if (err) reject(err)
+      poll_service
+        .delete_by_group_id(id)
+        .then(() => resolve(result))
+        .catch(err => reject(err))
       resolve(result)
     })
   })
