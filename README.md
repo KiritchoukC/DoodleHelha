@@ -24,8 +24,8 @@ For detailed explanation on how things work, checkout [Nuxt.js docs](https://nux
 # Tasks left
 
 - SOCKET
-- [x] Redirection quand groupe supprimé
-- [x] Earth (Orbit/Moon)
+- [ ] Redirection quand groupe supprimé
+- [ ] Earth (Orbit/Moon)
 - API
 - [ ] Résultats d'un poll
 - [ ] Ajout d'un poll à un groupe
