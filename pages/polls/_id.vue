@@ -106,7 +106,7 @@ export default {
   },
   head() {
     return {
-      title: `poll: ${this.poll.name}`
+      title: `DoodleHelha - Sondage : ${this.poll.name || 'Details'}`
     }
   },
   computed: {

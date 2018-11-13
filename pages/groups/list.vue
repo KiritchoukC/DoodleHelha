@@ -106,7 +106,7 @@ export default {
   },
   head() {
     return {
-      title: `Doodle - My Groups`
+      title: `DoodleHelha - Mes groupes`
     }
   },
   methods: {

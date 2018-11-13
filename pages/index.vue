@@ -111,7 +111,9 @@ export default {
   },
   head() {
     return {
-      title: `Doodle - Login`
+      title: `DoodleHELHa - ${
+        this.registering ? 'Enregistrement' : 'Connexion'
+      }`
     }
   },
   computed: {
@@ -134,7 +136,9 @@ export default {
     }
   },
   beforeMount() {},
-  mounted: function() {},
+  mounted: function() {
+    console.log(process)
+  },
   methods: {
     submit() {
       this.loading = true

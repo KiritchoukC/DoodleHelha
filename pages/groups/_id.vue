@@ -169,7 +169,7 @@ export default {
   },
   head() {
     return {
-      title: `Groupe : ${this.group.name || 'Details'}`
+      title: `DoodleHelha - Groupe : ${this.group.name || 'Details'}`
     }
   },
   methods: {
